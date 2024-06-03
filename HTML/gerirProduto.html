@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mostruário de Produtos</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <style>
+    .container-table {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container text-center">
+      <a class="navbar-brand" href="#">Gerenciamento de Produtos</a>
+    </div>
+  </nav>
+
+  <div class="container container-table">
+    <table class="table">
+      <thead class="thead-light">
+        <tr>
+          <th scope="col">Nome</th>
+          <th scope="col">Categoria</th>
+          <th scope="col">Imagem</th>
+          <th scope="col">Ações</th>
+        </tr>
+      </thead>
+      <tbody id="produtosTableBody">
+      </tbody>
+    </table>
+  </div>
+
+  <div class="modal fade" id="imagemModal" tabindex="-1" role="dialog" aria-labelledby="imagemModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="imagemModalLabel">Imagem do Produto</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <img id="modalImage" src="" class="img-fluid" alt="Imagem do Produto">
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="text-center">
+    <a href="caminhoProduto.html" class="btn btn-primary">Voltar</a>
+  </div>
+  
+
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      const produtosTableBody = document.getElementById("produtosTableBody");
+
+      try {
+        const response = await fetch("http://localhost:3000/api/produtos", {
+          method: "GET",
+          headers: {
+            'Authorization': 'Basic ' + btoa('user:user')
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error("Erro ao obter produtos");
+        }
+
+        const produtos = await response.json();
+
+        produtos.forEach(produto => {
+          const row = document.createElement("tr");
+
+          const nomeCell = document.createElement("td");
+          nomeCell.textContent = produto.nome;
+          row.appendChild(nomeCell);
+
+          const categoriaCell = document.createElement("td");
+          categoriaCell.textContent = produto.categoria;
+          row.appendChild(categoriaCell);
+
+          const imagemCell = document.createElement("td");
+          const imagemIcon = document.createElement("i");
+          imagemIcon.classList.add("far", "fa-eye");
+          imagemIcon.style.cursor = "pointer";
+          console.log(produto.imagem);
+          imagemIcon.onclick = () => openImage(produto.imagem, produto.nome);
+          imagemCell.appendChild(imagemIcon);
+          row.appendChild(imagemCell);
+
+          const acoesCell = document.createElement("td");
+          const editarIcon = document.createElement("i");
+          editarIcon.classList.add("far", "fa-edit", "text-primary", "mr-2");
+          editarIcon.style.cursor = "pointer";
+          editarIcon.onclick = () => redirectToEditPage(produto._id);
+          acoesCell.appendChild(editarIcon);
+          const excluirIcon = document.createElement("i");
+          excluirIcon.classList.add("far", "fa-trash-alt", "text-danger");
+          excluirIcon.style.cursor = "pointer";
+          excluirIcon.onclick = () => deleteProduct(produto._id);
+          acoesCell.appendChild(excluirIcon);
+          row.appendChild(acoesCell);
+
+          produtosTableBody.appendChild(row);
+        });
+      } catch (error) {
+        console.error("Erro ao obter produtos:", error);
+      }
+    });
+
+    function openImage(imageUrl, nomeProduto) {
+      const modalImage = document.getElementById("modalImage");
+      modalImage.src = imageUrl;
+
+      const modalTitle = document.getElementById("imagemModalLabel");
+      modalTitle.textContent = nomeProduto;
+
+      $('#imagemModal').modal('show');
+    }
+
+    function redirectToEditPage(productId) {
+      window.location.href = `editarProduto.html?id=${productId}`;
+    }
+
+    async function deleteProduct(productId) {
+      if (confirm("Tem certeza que deseja excluir este produto?")) {
+        try {
+          const response = await fetch(`http://localhost:3000/api/produtos/${productId}`, {
+            method: "DELETE",
+            headers: {
+              'Authorization': 'Basic ' + btoa('user:user')
+            }
+          });
+
+          if (!response.ok) {
+            throw new Error("Erro ao excluir o produto");
+          }
+
+
+        } catch (error) {
+          console.error("Erro ao excluir o produto:", error);
+        }
+      }
+    }
+  </script>
+</body>
+
+</html>

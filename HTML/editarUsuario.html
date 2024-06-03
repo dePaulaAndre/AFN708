@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editar Usuário</title>
+  <!-- Adicione o Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <!-- Adicione o Font Awesome para os ícones -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <style>
+    /* Estilos adicionais */
+    body {
+      background-color: #f8f9fa;
+    }
+
+    .navbar {
+      background-color: #007bff !important;
+    }
+
+    /* Estilos para o modal */
+    .modal-dialog {
+      max-width: 300px;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Navbar principal -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+      <a class="navbar-brand" href="#">Editar Usuário</a>
+    </div>
+  </nav>
+
+  <div class="container mt-5">
+    <form id="editUserForm">
+      <div class="form-group">
+        <label for="userName">Nome do Usuário</label>
+        <input type="text" class="form-control" id="userName" name="userName">
+      </div>
+      <div class="form-group">
+        <label for="userCPF">CPF</label>
+        <input type="text" class="form-control" id="userCPF" name="userCPF">
+      </div>
+      <div class="form-group">
+        <label for="userPassword">Senha</label>
+        <input type="password" class="form-control" id="userPassword" name="userPassword">
+      </div>
+      <button type="submit" class="btn btn-primary mr-2">Salvar</button>
+      <a href="gerirUsuario.html" class="btn btn-secondary">Cancelar</a>
+    </form>
+  </div>
+
+  <!-- Adicione o Bootstrap JS (opcional, mas necessário para alguns recursos do Bootstrap) -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        
+      const urlParams = new URLSearchParams(window.location.search);
+      const userId = urlParams.get('id');
+      
+      // Fazendo a requisição para obter os detalhes do usuário
+      try {
+        const response = await fetch(`http://localhost:3000/api/usuario/${userId}`, {
+          method: "GET",
+          headers: {
+            'Authorization': 'Basic ' + btoa('user:user')
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error("Erro ao obter detalhes do usuário");
+        }
+
+        const usuario = await response.json();
+
+        document.getElementById('userName').value = usuario.nome;
+        document.getElementById('userCPF').value = usuario.cpf;
+
+      } catch (error) {
+        console.error("Erro ao obter detalhes do usuário:", error);
+      }
+    });
+
+    document.getElementById("editUserForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const userId = urlParams.get('id');
+
+      const formData = new FormData(); // Objeto FormData para enviar o formulário
+      formData.append("nome", document.getElementById("userName").value);
+      formData.append("cpf", document.getElementById("userCPF").value);
+      formData.append("senha", document.getElementById("userPassword").value);
+
+      try {
+        const response = await fetch(`http://localhost:3000/api/usuario/${userId}`, {
+          method: "PUT",
+          headers: {
+            'Authorization': 'Basic ' + btoa('user:user')
+          },
+          body: formData // Envie o formulário como FormData
+        });
+
+        if (!response.ok) {
+          const errorMessage = await response.json();
+          throw new Error(errorMessage.message || "Erro ao editar o usuário");
+        }
+
+        // Redireciona para a página de gestão após a edição
+        window.location.href = "gerirUsuario.html";
+      } catch (error) {
+        console.error("Erro ao editar o usuário:", error);
+        // Tratar erros
+      }
+    });
+  </script>
+
+</body>
+
+</html>

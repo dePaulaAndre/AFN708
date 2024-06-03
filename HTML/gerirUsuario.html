@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mostruário de Usuários</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <style>
+    .container-table {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container text-center">
+      <a class="navbar-brand" href="#">Gerenciamento de Usuários</a>
+    </div>
+  </nav>
+
+  <div class="container container-table">
+    <table class="table">
+      <thead class="thead-light">
+        <tr>
+          <th scope="col">Nome</th>
+          <th scope="col">CPF</th>
+          <th scope="col">Senha</th>
+          <th scope="col">Ações</th>
+        </tr>
+      </thead>
+      <tbody id="usuariosTableBody">
+      </tbody>
+    </table>
+  </div>
+
+  <div class="modal fade" id="imagemModal" tabindex="-1" role="dialog" aria-labelledby="imagemModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="imagemModalLabel">Imagem do Usuário</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <img id="modalImage" src="" class="img-fluid" alt="Imagem do Usuário">
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="text-center">
+    <a href="caminhoUsuario.html" class="btn btn-primary">Voltar</a>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      const usuariosTableBody = document.getElementById("usuariosTableBody");
+
+      try {
+        const response = await fetch("http://localhost:3000/api/usuario", {
+          method: "GET",
+          headers: {
+            'Authorization': 'Basic ' + btoa('user:user')
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error("Erro ao obter usuários");
+        }
+
+        const usuarios = await response.json();
+
+        usuarios.forEach(usuario => {
+          const row = document.createElement("tr");
+
+          const nomeCell = document.createElement("td");
+          nomeCell.textContent = usuario.nome;
+          row.appendChild(nomeCell);
+
+          const cpfCell = document.createElement("td");
+          cpfCell.textContent = usuario.cpf;
+          row.appendChild(cpfCell);
+
+          const senhaCell = document.createElement("td");
+          senhaCell.textContent = usuario.senha; 
+          row.appendChild(senhaCell);
+
+          const acoesCell = document.createElement("td");
+          const editarIcon = document.createElement("i");
+          editarIcon.classList.add("far", "fa-edit", "text-primary", "mr-2");
+          editarIcon.style.cursor = "pointer";
+          editarIcon.onclick = () => redirectToEditPage(usuario._id);
+          acoesCell.appendChild(editarIcon);
+          const excluirIcon = document.createElement("i");
+          excluirIcon.classList.add("far", "fa-trash-alt", "text-danger");
+          excluirIcon.style.cursor = "pointer";
+          excluirIcon.onclick = () => deleteUser(usuario._id);
+          acoesCell.appendChild(excluirIcon);
+          row.appendChild(acoesCell);
+
+          usuariosTableBody.appendChild(row);
+        });
+      } catch (error) {
+        console.error("Erro ao obter usuários:", error);
+      }
+    });
+
+    function redirectToEditPage(userId) {
+      window.location.href = `editarUsuario.html?id=${userId}`;
+    }
+
+    async function deleteUser(userId) {
+      if (confirm("Tem certeza que deseja excluir este usuário?")) {
+        try {
+          const response = await fetch(`http://localhost:3000/api/usuario/${userId}`, {
+            method: "DELETE",
+            headers: {
+              'Authorization': 'Basic ' + btoa('user:user')
+            }
+          });
+
+          if (!response.ok) {
+            throw new Error("Erro ao excluir o usuário");
+          }
+
+         
+        } catch (error) {
+          console.error("Erro ao excluir o usuário:", error);
+        }
+      }
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Página de Login</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+  <div class="container">
+    <div class="row justify-content-center mt-5">
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="text-center">Login</h3>
+          </div>
+          <div class="card-body">
+            <form id="loginForm">
+              <div class="form-group">
+                <label for="username">Usuário:</label>
+                <input type="text" class="form-control" id="username" placeholder="Digite seu usuário">
+              </div>
+              <div class="form-group">
+                <label for="password">Senha:</label>
+                <input type="password" class="form-control" id="password" placeholder="Digite sua senha">
+              </div>
+              <button type="submit" class="btn btn-primary btn-block">Entrar</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const loginForm = document.getElementById('loginForm');
+
+      loginForm.addEventListener('submit', function(event) {
+        event.preventDefault(); 
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        fetch('../APIs/rotas/usuario.rota.js?cpf=' + encodeURIComponent(username) + '&senha=' + encodeURIComponent(password), {
+          headers: {
+            'Authorization': 'Basic ' + btoa('user:user')
+          }
+        })
+        .then(response => {
+          if (response.ok) {
+            window.location.href = 'home.html';
+          } else {
+            alert('Usuário ou senha incorretos');
+          }
+        })
+        .catch(error => {
+          console.error('Erro ao enviar solicitação:', error);
+        });
+      });
+    });
+  </script>
+</body>
+</html>
